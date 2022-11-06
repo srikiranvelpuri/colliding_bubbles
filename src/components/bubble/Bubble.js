@@ -5,7 +5,10 @@ import './Bubble.css'
 
 const Bubble = ({ circle }) => {
   return (
-    <span className={circle.popped ? 'popped' : ''} style={style(circle)}>
+    <span
+      className={`bubble ${circle.popped ? 'popped' : ''}`}
+      style={style(circle)}
+    >
       &nbsp;
     </span>
   )

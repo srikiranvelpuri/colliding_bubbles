@@ -1,11 +1,14 @@
-import React, { useEffect, useRef, useState } from 'react'
-import { rotate, flatten } from '../utils/common'
+import React, { useEffect, useState, useRef } from 'react'
+
 import Bubble from '../components/bubble'
+import CustomAppBar from '../components/appbar'
+import { ThemeProvider, createTheme } from '@mui/material/styles'
+import { distance, randomIntFromRange, resolveCollision } from '../utils/common'
 import './App.css'
 
 const App = () => {
   let circles = useRef([])
-  let lastExec = useRef(null)
+  let appBarRef = useRef(null)
   let appRef = useRef(null)
   let globalId = useRef(null)
   let bubbleRef = useRef(null)
@@ -13,122 +16,66 @@ const App = () => {
 
   const popAudio = require('../assets/pop.mp3')
 
-  const [lastCollisions, setLastCollisions] = useState([])
+  const [dummyState, setDummyState] = useState([])
   const [hiddenProperty, setHiddenProperty] = useState(null)
   const [visibilityChangeEvent, setVisibilityChange] = useState(null)
   const [moving, setMoving] = useState(true)
 
-  const update = (tm) => {
+  const bubbletrouble = JSON.parse(localStorage.getItem('bubbletrouble'))
+  const [isDark, setDark] = useState(bubbletrouble?.isDark || false)
+  const [allowAudio, setAllowAudio] = useState(
+    bubbletrouble?.allowAudio || false
+  )
+
+  const darkTheme = createTheme({
+    palette: {
+      mode: 'dark',
+    },
+  })
+
+  // const lightTheme = createTheme({
+  //   palette: {
+  //     mode: 'light',
+  //   },
+  // })
+
+  const update = () => {
     if (!moving) {
       return
     }
-    if (lastExec.current && circles.current?.length) {
-      var diff = tm - lastExec.current
-      var box = appRef.current?.getBoundingClientRect()
-      var radius = bubbleRef.current?.getBoundingClientRect()?.width
-      var couples = []
-      circles.current
-        ?.filter((cc) => !cc.popped)
-        ?.forEach((c1) => {
-          circles.current
-            ?.filter((cc) => !cc.popped)
-            ?.forEach((c2) => {
-              if (c1 !== c2) {
-                couples.push([c1, c2])
-              }
-            })
-        })
 
-      var collisions = couples.filter((couple) => {
-        var dist = Math.sqrt(
-          Math.pow(couple[0].y - couple[1].y, 2) +
-            Math.pow(couple[0].x - couple[1].x, 2)
-        )
-        return dist < radius * 2
-      })
+    var box = appRef.current?.getBoundingClientRect()
+    var radius = bubbleRef.current?.getBoundingClientRect()?.width
+    var padding = appBarRef.current?.getBoundingClientRect()?.height
 
-      var newcollisions = collisions.filter((couple) => {
-        var key = couple[0].key + couple[1].key
-        return lastCollisions.indexOf(key) < 0
-      })
-
-      newcollisions.forEach((couple) => {
-        var a = couple[0]
-        var b = couple[1]
-
-        if (a.collisionFree && b.collisionFree) {
-          if (!(a.collisionFree || b.collisionFree)) {
-            a.new_vx =
-              (a.vx * (a.mass - b.mass) + 2 * b.mass * b.vx) / (a.mass + b.mass)
-            a.new_vy =
-              (a.vy * (a.mass - b.mass) + 2 * b.mass * b.vy) / (a.mass + b.mass)
-          } else {
-            var dx = b.x - a.x
-            var dy = b.y - a.y
-            var collisionAngle = Math.atan2(dy, dx)
-            var sin = Math.sin(collisionAngle)
-            var cos = Math.cos(collisionAngle)
-            var pos_a = { x: 0, y: 0 }
-            var pos_b = rotate(dx, dy, sin, cos, true)
-            var vel_a = rotate(a.vx, a.vy, sin, cos, true)
-            var vel_b = rotate(b.vx, b.vy, sin, cos, true)
-            var vxTotal = vel_a.x - vel_b.x
-            vel_a.x =
-              ((a.mass - b.mass) * vel_a.x + 2 * b.mass * vel_b.x) /
-              (a.mass + b.mass)
-            vel_b.x = vxTotal + vel_a.x
-            pos_a.x += vel_a.x
-            pos_b.x += vel_b.x
-
-            var pos_a_final = rotate(pos_a.x, pos_a.y, sin, cos, false)
-            var vel_a_final = rotate(vel_a.x, vel_a.y, sin, cos, false)
-            a.new_x = a.x + pos_a_final.x
-            a.new_y = a.y + pos_a_final.y
-            a.new_vx = vel_a_final.x
-            a.new_vy = vel_a_final.y
+    circles.current?.forEach((c1) => {
+      circles.current?.forEach((c2) => {
+        if (c1 !== c2) {
+          if (distance(c1.x, c2.x, c1.y, c2.y) < radius * 2) {
+            resolveCollision(c1, c2)
           }
         }
       })
+    })
 
-      newcollisions.forEach((couple) => {
-        var a = couple[0]
-        if (a.new_vy) {
-          a.vx = a.new_vx
-          a.vy = a.new_vy
-          a.x = a.new_x
-          a.y = a.new_y
-          a.hue += 20
-        }
-      })
+    setDummyState([]) // hack to rerender ;)
 
-      setLastCollisions(
-        collisions.map((couple) => {
-          return couple[0].key + couple[1].key
-        })
-      )
+    circles.current.forEach((c) => {
+      if (c.x - radius <= 0 || c.x + radius >= box?.width) {
+        c.velocity.x = -c.velocity.x
+        c.hue += 20
+      }
+      if (
+        c.y - radius - padding <= 0 ||
+        c.y + radius >= box?.height + padding
+      ) {
+        c.velocity.y = -c.velocity.y
+        c.hue += 20
+      }
+      c.x += c.velocity.x
+      c.y += c.velocity.y
+    })
 
-      var collided = [...new Set(flatten(newcollisions))]
-      var collidedKeys = collided.map((c) => c.key)
-
-      circles.current.forEach((c) => {
-        c.collisionFree = c.collisionFree || collidedKeys.indexOf(c.key) < 0
-        if (c.y < 0) {
-          c.vy = Math.abs(c.vy)
-        } else if (c.y > box.height) {
-          c.vy = -Math.abs(c.vy)
-        }
-        if (c.x < 0) {
-          c.vx = Math.abs(c.vx)
-        } else if (c.x > box.width) {
-          c.vx = -Math.abs(c.vx)
-        }
-
-        c.y += c.vy * diff
-        c.x += c.vx * diff
-      })
-    }
-
-    lastExec.current = tm
     globalId.current = requestAnimationFrame(update)
   }
 
@@ -160,10 +107,12 @@ const App = () => {
       }
     })
     if (nearest) {
-      audioRef.current?.play()
-      if (navigator.vibrate) navigator.vibrate([100])
-      nearest.popped = true
+      if (allowAudio) {
+        audioRef.current?.play()
+        if (navigator.vibrate) navigator.vibrate([100])
+      }
 
+      nearest.popped = true
       setTimeout(() => {
         nearest.popped = false
       }, 1000)
@@ -173,17 +122,38 @@ const App = () => {
   useEffect(() => {
     var box = appRef.current?.getBoundingClientRect()
     var radius = bubbleRef.current?.getBoundingClientRect()?.width
+    var padding = appBarRef.current?.getBoundingClientRect()?.height
     var max = (box?.width * box?.height) / 300 / Math.pow(radius, 1.2)
     circles.current = []
-    for (var i = 0; i < max; i++) {
+    for (let i = 0; i < max; i++) {
+      let x = randomIntFromRange(radius, box?.width - radius)
+      let y = randomIntFromRange(
+        radius + padding,
+        box?.height - radius - padding
+      )
+      if (i !== 0) {
+        for (let j = 0; j < circles.current.length; j++) {
+          if (
+            distance(x, circles.current[j].x, y, circles.current[j].y) <
+            radius * 2
+          ) {
+            x = randomIntFromRange(radius, box?.width - radius)
+            y = randomIntFromRange(
+              radius + padding,
+              box?.height - radius - padding
+            )
+            j = -1
+          }
+        }
+      }
       circles.current.push({
-        key: Math.random(),
-        y: Math.random() * box?.height,
-        x: Math.random() * box?.width,
-        vx: Math.random() / 5,
-        vy: Math.random() / 5,
+        x,
+        y,
+        velocity: {
+          x: Math.random() - 0.5,
+          y: Math.random() - 0.5,
+        },
         hue: Math.random() * 360,
-        collisionFree: false,
         mass: 1,
         radius: radius,
         popped: false,
@@ -223,14 +193,26 @@ const App = () => {
   }, [])
 
   return (
-    <div id='app' onClick={(event) => handleClick(event)} ref={appRef}>
-      <i id='bubbleradius' ref={bubbleRef} />
-      {circles.current.map((circle, index) => (
-        <Bubble circle={circle} key={index} />
-      ))}
-      <audio ref={audioRef}>
-        <source src={popAudio} type='audio/mp3' />
-      </audio>
+    <div className='container'>
+      <ThemeProvider theme={darkTheme}>
+        <CustomAppBar
+          title='Bubble Trouble'
+          abref={appBarRef}
+          allowAudio={allowAudio}
+          isDark={isDark}
+          setDark={setDark}
+          setAllowAudio={setAllowAudio}
+        />
+        <div id='app' onClick={(event) => handleClick(event)} ref={appRef}>
+          <i id='bubbleradius' ref={bubbleRef} />
+          {circles.current.map((circle, index) => (
+            <Bubble circle={circle} key={index} />
+          ))}
+          <audio ref={audioRef}>
+            <source src={popAudio} type='audio/mp3' />
+          </audio>
+        </div>
+      </ThemeProvider>
     </div>
   )
 }

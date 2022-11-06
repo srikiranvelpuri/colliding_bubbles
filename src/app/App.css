@@ -23,11 +23,16 @@ body {
 }
 
 #app {
+    background-color: var(--black);
+    color: white;
+}
+
+.container {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: var(--black);
-    color: white;
+    display: grid;
+    grid-template-rows: 7% 93%;
 }

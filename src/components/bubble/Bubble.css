@@ -1,4 +1,4 @@
-span {
+.bubble {
     transform: translate(-50%, -50%);
     border-radius: var(--size);
     height: var(--size);
@@ -10,20 +10,31 @@ span {
         opacity 0.04s ease-in;
 }
 
-span.popped {
+.bubble.popped {
     transform: translate(-50%, -50%) scale(2);
     opacity: 0;
 }
 
-span:after {
+.bubble:before {
     content: "";
     position: absolute;
-    top: 18%;
-    left: 18%;
-    background-color: rgba(mix(white, cyan, 75%), 0.6);
+    top: 0%;
+    left: 0%;
+    box-shadow: 2px 2px 16px 0px rgb(255 255 255 / 12%);
+    width: calc((var(--size)));
+    height: calc((var(--size)));
+    border-radius: 50%;
+    transform: rotate(48deg) scale(1);
+}
+
+.bubble:after {
+    content: "";
+    position: absolute;
+    top: 13%;
+    left: 22%;
     box-shadow: inset 0 20px 30px rgba(255, 255, 255, 0.3);
     width: calc(var(--size)/14);
     height: calc(var(--size)/6);
     border-radius: 50%;
-    transform: rotate(45deg) scale(0.8);
+    transform: rotate(48deg) scale(0.8);
 }
