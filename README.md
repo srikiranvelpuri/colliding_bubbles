@@ -1,6 +1,6 @@
-# Bubble Trouble
+# Colliding Bubbles
 ### A simple web-based `fidget game` with collision detection and resolution . 
-### Built using ⚛️ReactJS, Check it here - [bubblefidget](https://collidingbubbles.netlify.app/) .
+### Built using ⚛️ReactJS, Check it here - [collidingbubbles](https://collidingbubbles.netlify.app/) .
 ## Features
 - Realistic physics
 - Responsive UI
