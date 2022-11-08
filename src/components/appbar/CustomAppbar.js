@@ -11,7 +11,7 @@ const CustomAppBar = ({
   setAllowAudio,
 }) => {
   return (
-    <div className='appbar' ref={abref}>
+    <div className='appbar' ref={abref} data-dark>
       <h1>{title}</h1>
       <CustomDrawer
         isDark={isDark}

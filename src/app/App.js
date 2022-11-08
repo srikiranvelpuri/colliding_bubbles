@@ -111,8 +111,11 @@ const App = () => {
         audioRef.current?.play()
         if (navigator.vibrate) navigator.vibrate([100])
       }
-
       nearest.popped = true
+      nearest.animatePop = true
+      setTimeout(() => {
+        nearest.animatePop = false
+      }, 200)
       setTimeout(() => {
         nearest.popped = false
       }, 1000)
@@ -157,6 +160,7 @@ const App = () => {
         mass: 1,
         radius: radius,
         popped: false,
+        animatePop: false,
       })
     }
 
@@ -196,15 +200,22 @@ const App = () => {
     <div className='container'>
       <ThemeProvider theme={darkTheme}>
         <CustomAppBar
-          title='Bubble Trouble'
+          title='Colliding Bubbles'
           abref={appBarRef}
           allowAudio={allowAudio}
           isDark={isDark}
           setDark={setDark}
           setAllowAudio={setAllowAudio}
         />
-        <div id='app' onClick={(event) => handleClick(event)} ref={appRef}>
+
+        <div
+          id='app'
+          onClick={(event) => handleClick(event)}
+          ref={appRef}
+          data-dark
+        >
           <i id='bubbleradius' ref={bubbleRef} />
+
           {circles.current.map((circle, index) => (
             <Bubble circle={circle} key={index} />
           ))}

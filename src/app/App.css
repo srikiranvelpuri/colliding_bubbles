@@ -1,6 +1,6 @@
 :root {
     --size: 9rem;
-    --black: rgb(29, 30, 34);
+    --black: rgb(0, 0, 0);
 }
 
 * {
@@ -23,8 +23,12 @@ body {
 }
 
 #app {
-    background-color: var(--black);
-    color: white;
+    background-image: linear-gradient(to top, #a18cd1 0%, #fbc2eb 100%);
+    color: white
+}
+
+#app[data-dark='true'] {
+    background: #000000f0;
 }
 
 .container {

@@ -1,6 +1,14 @@
 {
-  "name": "bubble_trouble",
-  "version": "0.1.0",
+  "name": "colliding_bubbles",
+  "version": "1.0.0",
+  "description": "colliding bubbles",
+  "keywords": [
+    "react",
+    "collision",
+    "bubbles",
+    "game"
+  ],
+  "main": "src/index.js",
   "private": true,
   "dependencies": {
     "@emotion/react": "^11.10.5",

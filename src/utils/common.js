@@ -52,7 +52,7 @@ export const resolveCollision = (particle, otherParticle) => {
 
     // Change color after collision
     particle.hue += 20
-    otherParticle += 20
+    otherParticle.hue += 20
   }
 }
 

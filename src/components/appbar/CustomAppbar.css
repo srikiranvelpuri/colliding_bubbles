@@ -1,16 +1,18 @@
 .appbar {
     display: flex;
     justify-content: center;
-    /* border-radius: 0rem; */
     place-items: center;
-    background-color: rgb(0 0 0);
-    box-shadow: inset 5px -6px 20px 1px rgb(74 74 74 / 80%);
+    background-image: linear-gradient(to top, #c471f5 0%, #fa71cd 100%);
     color: white;
+}
+
+.appbar[data-dark='true'] {
+    background-image: linear-gradient(to top, #09203f 0%, #537895 100%);
 }
 
 
 h1 {
     width: 90%;
     text-align: center;
-    font-family: Bubblegum Sans;
+    font-family: monospace;
 }

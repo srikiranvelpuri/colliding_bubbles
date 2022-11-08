@@ -8,7 +8,7 @@ import {
   ListItemText,
   SwipeableDrawer,
 } from '@mui/material'
-// import Toggle from './Toggle'
+// import Toggle from '../toggle'
 import { Audiotrack, MusicOff, GitHub, Menu } from '@mui/icons-material'
 
 const CustomDrawer = ({ isDark, setDark, allowAudio, setAllowAudio }) => {
@@ -69,7 +69,7 @@ const CustomDrawer = ({ isDark, setDark, allowAudio, setAllowAudio }) => {
     <Box sx={{ width: 250 }} role='presentation'>
       <List>
         {Object.keys(componentMapper).map((text, index) => (
-          <ListItem key={index} onClick={toggleDrawer(false)}>
+          <ListItem key={index}>
             <ListItemText primary={locale(text, componentMapper[text]?.cond)} />
             {componentMapper[text].component()}
           </ListItem>
